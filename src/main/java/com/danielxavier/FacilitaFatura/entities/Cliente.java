@@ -12,6 +12,8 @@ public class Cliente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private String card;
     private String name;
     private Double total;
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
