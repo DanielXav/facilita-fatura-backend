@@ -21,8 +21,8 @@ public class InvoiceItem {
     private BigDecimal value;
 
     @ManyToOne
-    @JoinColumn(name = "fatura_id")
-    private Fatura fatura;
+    @JoinColumn(name = "invoice_id")
+    private Invoice invoice;
 
     public InvoiceItem() {
     }

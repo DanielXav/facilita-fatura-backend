@@ -1,4 +1,4 @@
-package com.danielxavier.FacilitaFatura.resources.exceptions;
+package com.danielxavier.FacilitaFatura.controllers.exceptions;
 import java.time.Instant;
 
 public class StandardError {

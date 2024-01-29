@@ -8,19 +8,19 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Entity
-public class Fatura {
+public class Invoice {
 
     @Id
     private Long id;
     private LocalDate date;
 
-    @OneToMany(mappedBy = "fatura")
+    @OneToMany(mappedBy = "invoice")
     private List<InvoiceItem> items;
 
-    public Fatura(){
+    public Invoice(){
     }
 
-    public Fatura(Long id, LocalDate date, List<InvoiceItem> items) {
+    public Invoice(Long id, LocalDate date, List<InvoiceItem> items) {
         this.id = id;
         this.date = date;
         this.items = items;
