@@ -1,5 +1,6 @@
 package com.danielxavier.FacilitaFatura.controllers;
 
+import com.danielxavier.FacilitaFatura.services.TextractService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,9 +17,13 @@ public class InvoiceController {
     @Autowired
     private ImageService imageService;
 
+    @Autowired
+    private TextractService textractService;
+
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         String base64Image = imageService.convertToBase64(file);
-        return ResponseEntity.ok().body(base64Image);
+        String textract = textractService.analyzeDocument(base64Image);
+        return ResponseEntity.ok().body(textract);
     }
 }
