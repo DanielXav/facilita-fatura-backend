@@ -1,19 +1,28 @@
 package com.danielxavier.FacilitaFatura.entities;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
+@Entity
 public class InvoiceItem {
 
+    @Id
     private Long id;
-
-    // Criar classe Marca
     private String brand;
     private LocalDate purchaseDate;
     private String establishment;
     private String installment;
     private BigDecimal value;
+
+    @ManyToOne
+    @JoinColumn(name = "fatura_id")
+    private Fatura fatura;
 
     public InvoiceItem() {
     }

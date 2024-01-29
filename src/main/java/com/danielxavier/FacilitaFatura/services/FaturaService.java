@@ -1,11 +1,9 @@
 package com.danielxavier.FacilitaFatura.services;
 
 import com.danielxavier.FacilitaFatura.dto.ClienteDTO;
-import com.danielxavier.FacilitaFatura.dto.FaturaDTO;
+import com.danielxavier.FacilitaFatura.dto.Fatura_old_DTO;
 import com.danielxavier.FacilitaFatura.entities.Cliente;
-import com.danielxavier.FacilitaFatura.entities.Fatura;
-import com.danielxavier.FacilitaFatura.enums.Brand;
-import com.danielxavier.FacilitaFatura.enums.Month;
+import com.danielxavier.FacilitaFatura.entities.Fatura_OLD;
 import com.danielxavier.FacilitaFatura.exceptions.DatabaseException;
 import com.danielxavier.FacilitaFatura.exceptions.ResourceNotFoundException;
 import com.danielxavier.FacilitaFatura.repositories.ClienteRepository;
@@ -14,13 +12,11 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.Optional;
 
 @Service
@@ -33,33 +29,33 @@ public class FaturaService {
     private ClienteRepository clienteRepository;
 
     @Transactional(readOnly = true)
-    public Page<FaturaDTO> findAllPaged(Pageable pageable){
-        Page<Fatura> list = repository.findAll(pageable);
-        return list.map(FaturaDTO::new);
+    public Page<Fatura_old_DTO> findAllPaged(Pageable pageable){
+        Page<Fatura_OLD> list = repository.findAll(pageable);
+        return list.map(Fatura_old_DTO::new);
     }
 
     @Transactional(readOnly = true)
-    public FaturaDTO findById(Long id){
-        Optional<Fatura> obj = repository.findById(id);
-        Fatura entity = obj.orElseThrow(() -> new EntityNotFoundException("Fatura não encontrado!"));
-        return new FaturaDTO(entity, entity.getClientes());
+    public Fatura_old_DTO findById(Long id){
+        Optional<Fatura_OLD> obj = repository.findById(id);
+        Fatura_OLD entity = obj.orElseThrow(() -> new EntityNotFoundException("Fatura não encontrado!"));
+        return new Fatura_old_DTO(entity, entity.getClientes());
     }
 
     @Transactional
-    public FaturaDTO insert(FaturaDTO dto){
-        Fatura entity = new Fatura();
+    public Fatura_old_DTO insert(Fatura_old_DTO dto){
+        Fatura_OLD entity = new Fatura_OLD();
         copyDtoToEntity(dto, entity);
         entity = repository.save(entity);
-        return new FaturaDTO(entity);
+        return new Fatura_old_DTO(entity);
     }
 
     @Transactional
-    public FaturaDTO update(Long id, FaturaDTO dto) {
+    public Fatura_old_DTO update(Long id, Fatura_old_DTO dto) {
         try {
-            Fatura entity = repository.getReferenceById(id);
+            Fatura_OLD entity = repository.getReferenceById(id);
             copyDtoToEntity(dto, entity);
             entity = repository.save(entity);
-            return new FaturaDTO(entity);
+            return new Fatura_old_DTO(entity);
         }
         catch (EntityNotFoundException e) {
             throw new ResourceNotFoundException("Id não encontrado " + id);
@@ -79,7 +75,7 @@ public class FaturaService {
         }
     }
 
-    private void copyDtoToEntity(FaturaDTO dto, Fatura entity) {
+    private void copyDtoToEntity(Fatura_old_DTO dto, Fatura_OLD entity) {
         entity.setInvoice_month(dto.getInvoice_month());
         entity.setBrand(dto.getBrand());
         entity.setTotalMonth(dto.getTotalMonth());
