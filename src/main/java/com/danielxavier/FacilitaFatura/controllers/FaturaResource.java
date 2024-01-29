@@ -1,4 +1,4 @@
-package com.danielxavier.FacilitaFatura.resources;
+package com.danielxavier.FacilitaFatura.controllers;
 
 import com.danielxavier.FacilitaFatura.dto.Fatura_old_DTO;
 import com.danielxavier.FacilitaFatura.services.FaturaService;

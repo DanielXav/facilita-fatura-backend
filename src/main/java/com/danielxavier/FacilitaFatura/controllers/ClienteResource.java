@@ -1,4 +1,4 @@
-package com.danielxavier.FacilitaFatura.resources;
+package com.danielxavier.FacilitaFatura.controllers;
 
 import com.danielxavier.FacilitaFatura.dto.ClienteDTO;
 import com.danielxavier.FacilitaFatura.services.ClienteService;
@@ -13,8 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory; // Adicione esta linha
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "/clientes")
