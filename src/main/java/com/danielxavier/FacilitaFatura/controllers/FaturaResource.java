@@ -1,12 +1,10 @@
-package com.danielxavier.FacilitaFatura.resources;
+package com.danielxavier.FacilitaFatura.controllers;
 
-import com.danielxavier.FacilitaFatura.dto.FaturaDTO;
+import com.danielxavier.FacilitaFatura.dto.Fatura_old_DTO;
 import com.danielxavier.FacilitaFatura.services.FaturaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -21,19 +19,19 @@ public class FaturaResource {
     private FaturaService service;
 
     @GetMapping
-    public ResponseEntity<Page<FaturaDTO>> findAll(Pageable pageable){
-        Page<FaturaDTO> list = service.findAllPaged(pageable);
+    public ResponseEntity<Page<Fatura_old_DTO>> findAll(Pageable pageable){
+        Page<Fatura_old_DTO> list = service.findAllPaged(pageable);
         return ResponseEntity.ok().body(list);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<FaturaDTO> findById(@PathVariable Long id){
-        FaturaDTO dto = service.findById(id);
+    public ResponseEntity<Fatura_old_DTO> findById(@PathVariable Long id){
+        Fatura_old_DTO dto = service.findById(id);
         return ResponseEntity.ok().body(dto);
     }
 
     @PostMapping
-    public ResponseEntity<FaturaDTO> insert(@RequestBody FaturaDTO dto){
+    public ResponseEntity<Fatura_old_DTO> insert(@RequestBody Fatura_old_DTO dto){
         dto = service.insert(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(dto.getId()).toUri();
@@ -41,7 +39,7 @@ public class FaturaResource {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<FaturaDTO> insert(@PathVariable Long id, @RequestBody FaturaDTO dto){
+    public ResponseEntity<Fatura_old_DTO> insert(@PathVariable Long id, @RequestBody Fatura_old_DTO dto){
         dto = service.update(id, dto);
         return ResponseEntity.ok().body(dto);
     }

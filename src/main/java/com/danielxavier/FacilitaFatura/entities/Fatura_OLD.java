@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "tb_fatura")
-public class Fatura {
+public class Fatura_OLD {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,10 +30,10 @@ public class Fatura {
     )
     private Set<Cliente> clientes = new HashSet<>();
 
-    public Fatura(){
+    public Fatura_OLD(){
     }
 
-    public Fatura(Long id, Month invoice_month, Brand brand, Double totalMonth, Instant date) {
+    public Fatura_OLD(Long id, Month invoice_month, Brand brand, Double totalMonth, Instant date) {
         this.id = id;
         this.invoice_month = invoice_month;
         this.brand = brand;
@@ -88,7 +88,7 @@ public class Fatura {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Fatura fatura)) return false;
+        if (!(o instanceof Fatura_OLD fatura)) return false;
         return Objects.equals(id, fatura.id);
     }
 

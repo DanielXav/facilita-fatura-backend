@@ -1,4 +1,4 @@
-package com.danielxavier.FacilitaFatura.resources.exceptions;
+package com.danielxavier.FacilitaFatura.controllers.exceptions;
 
 import com.danielxavier.FacilitaFatura.exceptions.DatabaseException;
 import com.danielxavier.FacilitaFatura.exceptions.ResourceNotFoundException;
