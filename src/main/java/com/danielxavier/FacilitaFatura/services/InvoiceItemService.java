@@ -70,13 +70,25 @@ public class InvoiceItemService {
             LocalDate purchaseDate = LocalDate.parse(dateWithYear, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             String establishment = matcher.group(2).trim();
             String installment = matcher.group(3).trim();
-            String valorString = matcher.group(4).replace(".", "").replace(",", ".");
+            String valorString = matcher.group(4);
 
-            BigDecimal value = BigDecimal.ZERO;
+            if (valorString.matches("\\d{1,3},\\d{3}\\.\\d{2}")) {
+                // Correção: apenas remove a vírgula, mantém o ponto
+                valorString = valorString.replace(",", "");
+            }
+
+
+            // Remove pontos que são usados como separadores de milhares
+            valorString = valorString.replaceAll("\\.(\\d{3})", "$1");
+
+            // Substitui qualquer vírgula restante por um ponto
+            valorString = valorString.replace(",", ".");
+
+            BigDecimal value;
             try {
                 value = new BigDecimal(valorString);
             } catch (NumberFormatException e) {
-
+                value = BigDecimal.ZERO;
             }
 
             InvoiceItem item = new InvoiceItem();
@@ -90,6 +102,7 @@ public class InvoiceItemService {
         }
         return matchedItems;
     }
+
 
 }
 
