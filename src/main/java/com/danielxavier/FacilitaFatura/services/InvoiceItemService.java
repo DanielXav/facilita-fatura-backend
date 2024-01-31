@@ -19,28 +19,29 @@ import java.util.regex.Pattern;
 public class InvoiceItemService {
 
     private static final Pattern PATTERN_1 = Pattern.compile(
-            "\\@?(\\d{2}/\\d{2})\\s*(.*?)\\s*(\\d{2}/\\d{2})\\s*\\n?(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
+            "\\@?(\\d{2}/\\d{2})\\s*(.*?)\\s*(\\d{2}/\\d{2})?\\s*\\n?(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
     );
 
     private static final Pattern PATTERN_2 = Pattern.compile(
-            "\\@?(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*(\\d{2}/\\d{2})\\s*(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
+            "\\@?(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*(\\d{2}/\\d{2})?\\s*(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
     );
 
     private static final Pattern PATTERN_3 = Pattern.compile(
-            "(\\d{2}/\\d{2})\\s*(.*?)\\s*(\\d{2}/\\d{2})\\s*\\n(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
+            "(\\d{2}/\\d{2})\\s*(.*?)\\s*(\\d{2}/\\d{2})?\\s*\\n(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
     );
 
     private static final Pattern PATTERN_4 = Pattern.compile(
-            "(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*(\\d{2}/\\d{2})\\s*\\n(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
+            "(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*(\\d{2}/\\d{2})?\\s*\\n(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
     );
 
     private static final Pattern PATTERN_5 = Pattern.compile(
-            "(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*\\n(\\d{2}/\\d{2})\\s*(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
+            "(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*\\n(\\d{2}/\\d{2})?\\s*(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
     );
 
     private static final Pattern PATTERN_6 = Pattern.compile(
-            "(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*(\\d{2}/\\d{2})\\s*\\n(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
+            "(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*(\\d{2}/\\d{2})?\\s*\\n(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
     );
+
 
     public String determineBrand(String textract) {
         if (textract.contains("Pagamentos efetuados") || textract.contains("Lançamentos: compras e saques")) {
@@ -73,8 +74,12 @@ public class InvoiceItemService {
             String dateWithYear = matcher.group(1) + "/" + currentYear;
             LocalDate purchaseDate = LocalDate.parse(dateWithYear, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             String establishment = matcher.group(2).trim();
-            String installment = matcher.group(3).trim();
+            String installment = matcher.group(3) != null ? matcher.group(3).trim() : "N/A";
             String valorString = matcher.group(4);
+
+            if ("PAGAMENTO FICHA COMPENS".equals(establishment)) {
+                continue; // Pula para a próxima iteração do loop sem adicionar o item
+            }
 
             if (valorString.matches("\\d{1,3},\\d{3}\\.\\d{2}")) {
                 // Correção: apenas remove a vírgula, mantém o ponto

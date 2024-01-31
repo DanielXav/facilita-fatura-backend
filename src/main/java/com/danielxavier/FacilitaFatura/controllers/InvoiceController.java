@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.danielxavier.FacilitaFatura.services.ImageService;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -28,11 +29,12 @@ public class InvoiceController {
     private InvoiceItemService invoiceItemService;
 
     @PostMapping("/upload")
-    public ResponseEntity<List<InvoiceItem>> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<BigDecimal> uploadFile(@RequestParam("file") MultipartFile file) {
         String base64Image = imageService.convertToBase64(file);
         String textract = textractService.analyzeDocument(base64Image);
         String brand = invoiceItemService.determineBrand(textract);
         List<InvoiceItem> list = invoiceItemService.parseInvoiceItems(textract, brand);
-        return ResponseEntity.ok().body(list);
+        BigDecimal total = invoiceItemService.sumInvoiceItemValues(list);
+        return ResponseEntity.ok().body(total);
     }
 }
