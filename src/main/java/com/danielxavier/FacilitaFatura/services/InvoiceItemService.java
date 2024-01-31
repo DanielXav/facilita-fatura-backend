@@ -9,7 +9,9 @@ import java.time.LocalDate;
 import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,16 +51,18 @@ public class InvoiceItemService {
     }
 
     public List<InvoiceItem> parseInvoiceItems(String text, String brand) {
-        List<InvoiceItem> items = new ArrayList<>();
-        items.addAll(parsePattern(text, PATTERN_1, brand));
-        items.addAll(parsePattern(text, PATTERN_2, brand));
-        items.addAll(parsePattern(text, PATTERN_3, brand));
-        items.addAll(parsePattern(text, PATTERN_4, brand));
-        items.addAll(parsePattern(text, PATTERN_5, brand));
-        items.addAll(parsePattern(text, PATTERN_6, brand));
+        List<InvoiceItem> allItems = new ArrayList<>();
+        allItems.addAll(parsePattern(text, PATTERN_1, brand));
+        allItems.addAll(parsePattern(text, PATTERN_2, brand));
+        allItems.addAll(parsePattern(text, PATTERN_3, brand));
+        allItems.addAll(parsePattern(text, PATTERN_4, brand));
+        allItems.addAll(parsePattern(text, PATTERN_5, brand));
+        allItems.addAll(parsePattern(text, PATTERN_6, brand));
 
-        return items;
+        // Filtre os itens duplicados após coletar todos eles
+        return filterDuplicateItems(allItems);
     }
+
 
     private List<InvoiceItem> parsePattern(String text, Pattern pattern, String brand) {
         List<InvoiceItem> matchedItems = new ArrayList<>();
@@ -88,7 +92,12 @@ public class InvoiceItemService {
             try {
                 value = new BigDecimal(valorString);
             } catch (NumberFormatException e) {
-                value = BigDecimal.ZERO;
+                continue;
+            }
+
+            // Verificar se o valor está no formato X.XX
+            if (value.scale() == 2 && value.precision() - value.scale() == 1) {
+                continue;
             }
 
             InvoiceItem item = new InvoiceItem();
@@ -103,6 +112,25 @@ public class InvoiceItemService {
         return matchedItems;
     }
 
+    private List<InvoiceItem> filterDuplicateItems(List<InvoiceItem> items) {
+        Set<BigDecimal> seenValues = new HashSet<>();
+        List<InvoiceItem> uniqueItems = new ArrayList<>();
+
+        for (InvoiceItem item : items) {
+            if (!seenValues.contains(item.getValue())) {
+                seenValues.add(item.getValue());
+                uniqueItems.add(item);
+            }
+        }
+
+        return uniqueItems;
+    }
+
+    public BigDecimal sumInvoiceItemValues(List<InvoiceItem> items) {
+        return items.stream()
+                .map(InvoiceItem::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 
 }
 
