@@ -1,9 +1,6 @@
 package com.danielxavier.FacilitaFatura.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,12 +10,13 @@ import java.util.Objects;
 public class InvoiceItem {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String brand;
     private LocalDate purchaseDate;
     private String establishment;
     private String installment;
-    private BigDecimal value;
+    private Double value;
 
     @ManyToOne
     @JoinColumn(name = "invoice_id")
@@ -27,7 +25,7 @@ public class InvoiceItem {
     public InvoiceItem() {
     }
 
-    public InvoiceItem(Long id, String brand, LocalDate purchaseDate, String establishment, String installment, BigDecimal value) {
+    public InvoiceItem(Long id, String brand, LocalDate purchaseDate, String establishment, String installment, Double value) {
         this.id = id;
         this.brand = brand;
         this.purchaseDate = purchaseDate;
@@ -76,11 +74,11 @@ public class InvoiceItem {
         this.installment = installment;
     }
 
-    public BigDecimal getValue() {
+    public Double getValue() {
         return value;
     }
 
-    public void setValue(BigDecimal value) {
+    public void setValue(Double value) {
         this.value = value;
     }
 
