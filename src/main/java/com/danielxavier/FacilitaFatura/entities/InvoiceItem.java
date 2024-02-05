@@ -16,7 +16,7 @@ public class InvoiceItem {
     private LocalDate purchaseDate;
     private String establishment;
     private String installment;
-    private BigDecimal value;
+    private Double value;
 
     @ManyToOne
     @JoinColumn(name = "invoice_id")
@@ -25,7 +25,7 @@ public class InvoiceItem {
     public InvoiceItem() {
     }
 
-    public InvoiceItem(Long id, String brand, LocalDate purchaseDate, String establishment, String installment, BigDecimal value) {
+    public InvoiceItem(Long id, String brand, LocalDate purchaseDate, String establishment, String installment, Double value) {
         this.id = id;
         this.brand = brand;
         this.purchaseDate = purchaseDate;
@@ -74,11 +74,11 @@ public class InvoiceItem {
         this.installment = installment;
     }
 
-    public BigDecimal getValue() {
+    public Double getValue() {
         return value;
     }
 
-    public void setValue(BigDecimal value) {
+    public void setValue(Double value) {
         this.value = value;
     }
 

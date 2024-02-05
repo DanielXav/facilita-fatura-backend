@@ -2,6 +2,8 @@ package com.danielxavier.FacilitaFatura.services;
 
 
 import com.danielxavier.FacilitaFatura.entities.InvoiceItem;
+import com.danielxavier.FacilitaFatura.repositories.InvoiceItemRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -18,29 +20,37 @@ import java.util.regex.Pattern;
 @Service
 public class InvoiceItemService {
 
+    @Autowired
+    private InvoiceItemRepository repository;
+
     private static final Pattern PATTERN_1 = Pattern.compile(
-            "\\@?(\\d{2}/\\d{2})\\s*(.*?)\\s*(\\d{2}/\\d{2})?\\s*\\n?(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
+            "\\@?(\\d{2}/\\d{2})\\s*(.*?)\\s*(\\d{2}/\\d{2})?\\s*\\n?((\\d{1,3}(?:[.,]\\d{3})*[.,]\\d{2})|\\d+[.,]\\d{2})"
     );
 
     private static final Pattern PATTERN_2 = Pattern.compile(
-            "\\@?(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*(\\d{2}/\\d{2})?\\s*(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
-    );
+            "\\@?(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*(\\d{2}/\\d{2})?\\s*((\\d{1,3}(?:[.,]\\d{3})*[.,]\\d{2})|\\d+[.,]\\d{2})"
+
+            );
 
     private static final Pattern PATTERN_3 = Pattern.compile(
-            "(\\d{2}/\\d{2})\\s*(.*?)\\s*(\\d{2}/\\d{2})?\\s*\\n(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
-    );
+            "(\\d{2}/\\d{2})\\s*(.*?)\\s*(\\d{2}/\\d{2})?\\s*\\n((\\d{1,3}(?:[.,]\\d{3})*[.,]\\d{2})|\\d+[.,]\\d{2})"
+
+            );
 
     private static final Pattern PATTERN_4 = Pattern.compile(
-            "(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*(\\d{2}/\\d{2})?\\s*\\n(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
-    );
+            "(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*(\\d{2}/\\d{2})?\\s*\\n((\\d{1,3}(?:[.,]\\d{3})*[.,]\\d{2})|\\d+[.,]\\d{2})"
+
+            );
 
     private static final Pattern PATTERN_5 = Pattern.compile(
-            "(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*\\n(\\d{2}/\\d{2})?\\s*(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
-    );
+            "(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*\\n(\\d{2}/\\d{2})?\\s*((\\d{1,3}(?:[.,]\\d{3})*[.,]\\d{2})|\\d+[.,]\\d{2})"
+
+            );
 
     private static final Pattern PATTERN_6 = Pattern.compile(
-            "(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*(\\d{2}/\\d{2})?\\s*\\n(\\d{1,3}(\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})"
-    );
+            "(\\d{2}/\\d{2})\\s*\\n(.*?)\\s*(\\d{2}/\\d{2})?\\s*\\n((\\d{1,3}(?:[.,]\\d{3})*[.,]\\d{2})|\\d+[.,]\\d{2})"
+
+            );
 
 
     public String determineBrand(String textract) {
@@ -56,11 +66,10 @@ public class InvoiceItemService {
         allItems.addAll(parsePattern(text, PATTERN_1, brand));
         allItems.addAll(parsePattern(text, PATTERN_2, brand));
         allItems.addAll(parsePattern(text, PATTERN_3, brand));
-        allItems.addAll(parsePattern(text, PATTERN_4, brand));
-        allItems.addAll(parsePattern(text, PATTERN_5, brand));
         allItems.addAll(parsePattern(text, PATTERN_6, brand));
+        allItems.addAll(parsePattern(text, PATTERN_5, brand));
+        allItems.addAll(parsePattern(text, PATTERN_4, brand));
 
-        // Filtre os itens duplicados após coletar todos eles
         return filterDuplicateItems(allItems);
     }
 
@@ -72,36 +81,38 @@ public class InvoiceItemService {
 
         while (matcher.find()) {
             String dateWithYear = matcher.group(1) + "/" + currentYear;
+
+            String[] dateParts = dateWithYear.split("/");
+
+            if (dateParts[0].equals("00")) {
+                dateWithYear = "01/" + dateParts[1] + "/" + dateParts[2];
+            }
+
             LocalDate purchaseDate = LocalDate.parse(dateWithYear, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             String establishment = matcher.group(2).trim();
             String installment = matcher.group(3) != null ? matcher.group(3).trim() : "N/A";
             String valorString = matcher.group(4);
 
             if ("PAGAMENTO FICHA COMPENS".equals(establishment)) {
-                continue; // Pula para a próxima iteração do loop sem adicionar o item
+                continue;
             }
-
-            if (valorString.matches("\\d{1,3},\\d{3}\\.\\d{2}")) {
-                // Correção: apenas remove a vírgula, mantém o ponto
-                valorString = valorString.replace(",", "");
-            }
-
-
-            // Remove pontos que são usados como separadores de milhares
-            valorString = valorString.replaceAll("\\.(\\d{3})", "$1");
-
-            // Substitui qualquer vírgula restante por um ponto
-            valorString = valorString.replace(",", ".");
-
-            BigDecimal value;
-            try {
-                value = new BigDecimal(valorString);
-            } catch (NumberFormatException e) {
+            else if ("CREDITO PAGAMENTO LOJA".equals(establishment)) {
                 continue;
             }
 
-            // Verificar se o valor está no formato X.XX
-            if (value.scale() == 2 && value.precision() - value.scale() == 1) {
+            valorString = valorString.replace('.', ',');
+
+            int lastCommaIndex = valorString.lastIndexOf(',');
+            if (lastCommaIndex != -1) {
+                String beforeLastComma = valorString.substring(0, lastCommaIndex).replaceAll(",", "");
+                String afterLastComma = valorString.substring(lastCommaIndex + 1);
+                valorString = beforeLastComma + "." + afterLastComma;
+            }
+
+            Double value;
+            try {
+                value = Double.parseDouble(valorString);
+            } catch (NumberFormatException e) {
                 continue;
             }
 
@@ -118,24 +129,28 @@ public class InvoiceItemService {
     }
 
     private List<InvoiceItem> filterDuplicateItems(List<InvoiceItem> items) {
-        Set<BigDecimal> seenValues = new HashSet<>();
+        Set<String> seen = new HashSet<>();
         List<InvoiceItem> uniqueItems = new ArrayList<>();
 
         for (InvoiceItem item : items) {
-            if (!seenValues.contains(item.getValue())) {
-                seenValues.add(item.getValue());
+            String key = item.getValue() + "@" + item.getPurchaseDate();
+
+            boolean isInvalidItem = item.getEstablishment().isEmpty() && "N/A".equals(item.getInstallment());
+
+            if (!seen.contains(key) && !isInvalidItem) {
+                seen.add(key);
                 uniqueItems.add(item);
             }
         }
-
         return uniqueItems;
     }
 
-    public BigDecimal sumInvoiceItemValues(List<InvoiceItem> items) {
+    public Double sumInvoiceItemValues(List<InvoiceItem> items) {
         return items.stream()
                 .map(InvoiceItem::getValue)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(0.0, Double::sum);
     }
+
 
 }
 

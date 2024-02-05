@@ -29,12 +29,12 @@ public class InvoiceController {
     private InvoiceItemService invoiceItemService;
 
     @PostMapping("/upload")
-    public ResponseEntity<BigDecimal> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Double> uploadFile(@RequestParam("file") MultipartFile file) {
         String base64Image = imageService.convertToBase64(file);
         String textract = textractService.analyzeDocument(base64Image);
         String brand = invoiceItemService.determineBrand(textract);
         List<InvoiceItem> list = invoiceItemService.parseInvoiceItems(textract, brand);
-        BigDecimal total = invoiceItemService.sumInvoiceItemValues(list);
+        Double total = invoiceItemService.sumInvoiceItemValues(list);
         return ResponseEntity.ok().body(total);
     }
 }
