@@ -16,7 +16,7 @@ public class InvoiceItem {
     private LocalDate purchaseDate;
     private String establishment;
     private String installment;
-    private Double value;
+    private Double itemValue;
 
     @ManyToOne
     @JoinColumn(name = "invoice_id")
@@ -25,13 +25,13 @@ public class InvoiceItem {
     public InvoiceItem() {
     }
 
-    public InvoiceItem(Long id, String brand, LocalDate purchaseDate, String establishment, String installment, Double value) {
+    public InvoiceItem(Long id, String brand, LocalDate purchaseDate, String establishment, String installment, Double itemValue) {
         this.id = id;
         this.brand = brand;
         this.purchaseDate = purchaseDate;
         this.establishment = establishment;
         this.installment = installment;
-        this.value = value;
+        this.itemValue = itemValue;
     }
 
     public Long getId() {
@@ -74,12 +74,12 @@ public class InvoiceItem {
         this.installment = installment;
     }
 
-    public Double getValue() {
-        return value;
+    public Double getItemValue() {
+        return itemValue;
     }
 
-    public void setValue(Double value) {
-        this.value = value;
+    public void setItemValue(Double itemValue) {
+        this.itemValue = itemValue;
     }
 
     @Override
