@@ -6,14 +6,10 @@ import com.danielxavier.FacilitaFatura.repositories.InvoiceItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Year;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -52,6 +48,25 @@ public class InvoiceItemService {
 
             );
 
+    private static final Pattern PATTERN_7 = Pattern.compile(
+            "(\\d{2}\\s*(?:jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez))\\s*(.*?)\\s*-\\s*Parcela\\s*(\\d+/\\d+)\\s*\\n(\\d{1,3}(?:[.,]\\d{3})*[.,]\\d{2})"
+    );
+
+    private static final Map<String, String> MONTH_MAP = new HashMap<>();
+    static {
+        MONTH_MAP.put("jan", "01");
+        MONTH_MAP.put("fev", "02");
+        MONTH_MAP.put("mar", "03");
+        MONTH_MAP.put("abr", "04");
+        MONTH_MAP.put("mai", "05");
+        MONTH_MAP.put("jun", "06");
+        MONTH_MAP.put("jul", "07");
+        MONTH_MAP.put("ago", "08");
+        MONTH_MAP.put("set", "09");
+        MONTH_MAP.put("out", "10");
+        MONTH_MAP.put("nov", "11");
+        MONTH_MAP.put("dez", "12");
+    }
 
     public String determineBrand(String textract) {
         if (textract.contains("Pagamentos efetuados") || textract.contains("Lançamentos: compras e saques")) {
@@ -69,9 +84,43 @@ public class InvoiceItemService {
         allItems.addAll(parsePattern(text, PATTERN_6, brand));
         allItems.addAll(parsePattern(text, PATTERN_5, brand));
         allItems.addAll(parsePattern(text, PATTERN_4, brand));
+        allItems.addAll(parsePattern(text, PATTERN_7, brand));
 
         return filterDuplicateItems(allItems);
     }
+
+    private LocalDate convertDateStringToLocalDate(String dateString, String brand) {
+        int currentYear = Year.now().getValue();
+
+        if ("Hipercard".equals(brand)) {
+
+            String[] dateParts = dateString.split("/");
+            if (dateParts.length < 2) {
+                return null;
+            }
+            String day = dateParts[0];
+            String month = dateParts.length > 1 ? dateParts[1] : "01"; //OBS
+            String dateWithYear = day + "/" + month + "/" + currentYear;
+
+            return LocalDate.parse(dateWithYear, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        } else {
+
+            String[] parts = dateString.split(" ");
+            if (parts.length < 2) {
+                return null;
+            }
+            String day = parts[0];
+            String monthAbbr = parts[1];
+            String month = MONTH_MAP.get(monthAbbr.toLowerCase());
+            if (month == null) {
+                return null;
+            }
+            String dateWithYear = day + "/" + month + "/" + currentYear;
+            LocalDate parsedDate = LocalDate.parse(dateWithYear, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            return parsedDate;
+        }
+    }
+
 
 
     private List<InvoiceItem> parsePattern(String text, Pattern pattern, String brand) {
@@ -80,17 +129,13 @@ public class InvoiceItemService {
         int currentYear = Year.now().getValue();
 
         while (matcher.find()) {
-            String dateWithYear = matcher.group(1) + "/" + currentYear;
-
-            String[] dateParts = dateWithYear.split("/");
-
-            if (dateParts[0].equals("00")) {
-                dateWithYear = "01/" + dateParts[1] + "/" + dateParts[2];
-            }
-
-            LocalDate purchaseDate = LocalDate.parse(dateWithYear, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+            System.out.println(matcher.group(1));
+            LocalDate purchaseDate = convertDateStringToLocalDate(matcher.group(1), brand);
+            System.out.println(matcher.group(2));
             String establishment = matcher.group(2).trim();
+            System.out.println(matcher.group(3));
             String installment = matcher.group(3) != null ? matcher.group(3).trim() : "N/A";
+            System.out.println(matcher.group(4));
             String valorString = matcher.group(4);
 
             if ("PAGAMENTO FICHA COMPENS".equals(establishment)) {
@@ -150,7 +195,5 @@ public class InvoiceItemService {
                 .map(InvoiceItem::getValue)
                 .reduce(0.0, Double::sum);
     }
-
-
 }
 
