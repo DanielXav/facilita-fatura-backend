@@ -86,6 +86,8 @@ public class InvoiceItemService {
         allItems.addAll(parsePattern(text, PATTERN_4, brand));
         allItems.addAll(parsePattern(text, PATTERN_7, brand));
 
+        repository.saveAll(filterDuplicateItems(allItems));
+
         return filterDuplicateItems(allItems);
     }
 
@@ -104,7 +106,6 @@ public class InvoiceItemService {
 
             return LocalDate.parse(dateWithYear, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         } else {
-
             String[] parts = dateString.split(" ");
             if (parts.length < 2) {
                 return null;
@@ -126,16 +127,12 @@ public class InvoiceItemService {
     private List<InvoiceItem> parsePattern(String text, Pattern pattern, String brand) {
         List<InvoiceItem> matchedItems = new ArrayList<>();
         Matcher matcher = pattern.matcher(text);
-        int currentYear = Year.now().getValue();
 
         while (matcher.find()) {
-            System.out.println(matcher.group(1));
+
             LocalDate purchaseDate = convertDateStringToLocalDate(matcher.group(1), brand);
-            System.out.println(matcher.group(2));
             String establishment = matcher.group(2).trim();
-            System.out.println(matcher.group(3));
             String installment = matcher.group(3) != null ? matcher.group(3).trim() : "N/A";
-            System.out.println(matcher.group(4));
             String valorString = matcher.group(4);
 
             if ("PAGAMENTO FICHA COMPENS".equals(establishment)) {
@@ -166,7 +163,7 @@ public class InvoiceItemService {
             item.setPurchaseDate(purchaseDate);
             item.setEstablishment(establishment);
             item.setInstallment(installment);
-            item.setValue(value);
+            item.setItemValue(value);
 
             matchedItems.add(item);
         }
@@ -178,7 +175,7 @@ public class InvoiceItemService {
         List<InvoiceItem> uniqueItems = new ArrayList<>();
 
         for (InvoiceItem item : items) {
-            String key = item.getValue() + "@" + item.getPurchaseDate();
+            String key = item.getItemValue() + "@" + item.getPurchaseDate();
 
             boolean isInvalidItem = item.getEstablishment().isEmpty() && "N/A".equals(item.getInstallment());
 
@@ -192,7 +189,7 @@ public class InvoiceItemService {
 
     public Double sumInvoiceItemValues(List<InvoiceItem> items) {
         return items.stream()
-                .map(InvoiceItem::getValue)
+                .map(InvoiceItem::getItemValue)
                 .reduce(0.0, Double::sum);
     }
 }
