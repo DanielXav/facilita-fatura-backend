@@ -141,6 +141,9 @@ public class InvoiceItemService {
             else if ("CREDITO PAGAMENTO LOJA".equals(establishment)) {
                 continue;
             }
+            else if ("Total dos lançamentos atuais".equals(establishment)) {
+                continue;
+            }
 
             valorString = valorString.replace('.', ',');
 
