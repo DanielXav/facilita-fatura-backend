@@ -1,6 +1,6 @@
 package com.danielxavier.FacilitaFatura.dto;
 
-import com.danielxavier.FacilitaFatura.entities.Cliente;
+import com.danielxavier.FacilitaFatura.entities.Client;
 import com.danielxavier.FacilitaFatura.entities.Fatura_OLD;
 import com.danielxavier.FacilitaFatura.enums.Brand;
 import com.danielxavier.FacilitaFatura.enums.Month;
@@ -18,7 +18,7 @@ public class Fatura_old_DTO {
     private Double totalMonth;
     private Instant date;
     private Double totalFaturaClientes;
-    private List<ClienteDTO> clientes = new ArrayList<>();
+    private List<ClientDTO> clientes = new ArrayList<>();
 
     public Fatura_old_DTO(){
     }
@@ -41,9 +41,9 @@ public class Fatura_old_DTO {
         this.totalFaturaClientes = entity.calculateTotalFatura();
     }
 
-    public Fatura_old_DTO(Fatura_OLD entity, Set<Cliente> clientes){
+    public Fatura_old_DTO(Fatura_OLD entity, Set<Client> clients){
         this(entity);
-        clientes.forEach(cli -> this.clientes.add(new ClienteDTO(cli)));
+        clients.forEach(cli -> this.clientes.add(new ClientDTO(cli)));
     }
 
     public Long getId() {
@@ -94,11 +94,11 @@ public class Fatura_old_DTO {
         this.totalFaturaClientes = totalFaturaClientes;
     }
 
-    public List<ClienteDTO> getClientes() {
+    public List<ClientDTO> getClientes() {
         return clientes;
     }
 
-    public void setClientes(List<ClienteDTO> clientes) {
+    public void setClientes(List<ClientDTO> clientes) {
         this.clientes = clientes;
     }
 

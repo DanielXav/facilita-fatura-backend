@@ -28,7 +28,7 @@ public class Fatura_OLD {
             joinColumns = @JoinColumn(name = "fatura_id"),
             inverseJoinColumns = @JoinColumn(name = "cliente_id")
     )
-    private Set<Cliente> clientes = new HashSet<>();
+    private Set<Client> clients = new HashSet<>();
 
     public Fatura_OLD(){
     }
@@ -81,8 +81,8 @@ public class Fatura_OLD {
         this.date = date;
     }
 
-    public Set<Cliente> getClientes() {
-        return clientes;
+    public Set<Client> getClientes() {
+        return clients;
     }
 
     @Override
@@ -99,8 +99,8 @@ public class Fatura_OLD {
 
     public Double calculateTotalFatura(){
         double totalFatura = 0.0;
-        for (Cliente cliente : clientes){
-            totalFatura += cliente.getTotal();
+        for (Client client : clients){
+            totalFatura += client.getTotal();
         }
         return totalFatura;
     }

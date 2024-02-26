@@ -1,40 +1,28 @@
 package com.danielxavier.FacilitaFatura.controllers;
 
-import com.danielxavier.FacilitaFatura.entities.InvoiceItem;
-import com.danielxavier.FacilitaFatura.services.InvoiceItemService;
-import com.danielxavier.FacilitaFatura.services.TextractService;
+import com.danielxavier.FacilitaFatura.dto.InvoiceDTO;
+import com.danielxavier.FacilitaFatura.services.InvoiceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.danielxavier.FacilitaFatura.services.ImageService;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.math.BigDecimal;
-import java.util.List;
+import java.net.URI;
 
 @RestController
 @RequestMapping("/invoice")
 public class InvoiceController {
 
     @Autowired
-    private ImageService imageService;
+    private InvoiceService invoiceService;
 
-    @Autowired
-    private TextractService textractService;
-
-    @Autowired
-    private InvoiceItemService invoiceItemService;
-
-    @PostMapping("/upload")
-    public ResponseEntity<Double> uploadFile(@RequestParam("file") MultipartFile file) {
-        String base64Image = imageService.convertToBase64(file);
-        String textract = textractService.analyzeDocument(base64Image);
-        String brand = invoiceItemService.determineBrand(textract);
-        List<InvoiceItem> list = invoiceItemService.parseInvoiceItems(textract, brand);
-        Double total = invoiceItemService.sumInvoiceItemValues(list);
-        return ResponseEntity.ok().body(total);
+    @PostMapping
+    public ResponseEntity<InvoiceDTO> insert(@RequestBody InvoiceDTO invoice) {
+        invoice = invoiceService.insert(invoice);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(invoice.getId()).toUri();
+        return ResponseEntity.created(uri).body(invoice);
     }
 }

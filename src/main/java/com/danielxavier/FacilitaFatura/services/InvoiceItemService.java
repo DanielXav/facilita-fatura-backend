@@ -1,8 +1,10 @@
 package com.danielxavier.FacilitaFatura.services;
 
 
+import com.danielxavier.FacilitaFatura.dto.InvoiceItemDTO;
 import com.danielxavier.FacilitaFatura.entities.InvoiceItem;
 import com.danielxavier.FacilitaFatura.repositories.InvoiceItemRepository;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -76,8 +78,10 @@ public class InvoiceItemService {
         }
     }
 
-    public List<InvoiceItem> parseInvoiceItems(String text, String brand) {
+    public List<InvoiceItemDTO> parseInvoiceItems(String text, String brand) {
         List<InvoiceItem> allItems = new ArrayList<>();
+        List<InvoiceItemDTO> allItemsDTO = new ArrayList<>();
+
         allItems.addAll(parsePattern(text, PATTERN_1, brand));
         allItems.addAll(parsePattern(text, PATTERN_2, brand));
         allItems.addAll(parsePattern(text, PATTERN_3, brand));
@@ -86,9 +90,17 @@ public class InvoiceItemService {
         allItems.addAll(parsePattern(text, PATTERN_4, brand));
         allItems.addAll(parsePattern(text, PATTERN_7, brand));
 
-        repository.saveAll(filterDuplicateItems(allItems));
+        List<InvoiceItem> filteredItems = filterDuplicateItems(allItems);
+        repository.saveAll(filteredItems);
 
-        return filterDuplicateItems(allItems);
+        for (InvoiceItem item : filteredItems) {
+            InvoiceItemDTO dto = new InvoiceItemDTO();
+            BeanUtils.copyProperties(item, dto);
+            allItemsDTO.add(dto);
+        }
+
+
+        return allItemsDTO;
     }
 
     private LocalDate convertDateStringToLocalDate(String dateString, String brand) {
@@ -190,9 +202,9 @@ public class InvoiceItemService {
         return uniqueItems;
     }
 
-    public Double sumInvoiceItemValues(List<InvoiceItem> items) {
+    public Double sumInvoiceItemValues(List<InvoiceItemDTO> items) {
         return items.stream()
-                .map(InvoiceItem::getItemValue)
+                .map(InvoiceItemDTO::getItemValue)
                 .reduce(0.0, Double::sum);
     }
 }

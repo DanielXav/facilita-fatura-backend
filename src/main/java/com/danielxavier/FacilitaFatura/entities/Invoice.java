@@ -1,21 +1,22 @@
 package com.danielxavier.FacilitaFatura.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "tb_invoice")
 public class Invoice {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private LocalDate date;
 
     @OneToMany(mappedBy = "invoice")
-    private List<InvoiceItem> items;
+    private List<InvoiceItem> items = new ArrayList<>();;
 
     public Invoice(){
     }

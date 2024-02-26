@@ -1,12 +1,12 @@
 package com.danielxavier.FacilitaFatura.services;
 
-import com.danielxavier.FacilitaFatura.dto.ClienteDTO;
+import com.danielxavier.FacilitaFatura.dto.ClientDTO;
 import com.danielxavier.FacilitaFatura.dto.Fatura_old_DTO;
-import com.danielxavier.FacilitaFatura.entities.Cliente;
+import com.danielxavier.FacilitaFatura.entities.Client;
 import com.danielxavier.FacilitaFatura.entities.Fatura_OLD;
 import com.danielxavier.FacilitaFatura.exceptions.DatabaseException;
 import com.danielxavier.FacilitaFatura.exceptions.ResourceNotFoundException;
-import com.danielxavier.FacilitaFatura.repositories.ClienteRepository;
+import com.danielxavier.FacilitaFatura.repositories.ClientRepository;
 import com.danielxavier.FacilitaFatura.repositories.FaturaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class FaturaService {
     private FaturaRepository repository;
 
     @Autowired
-    private ClienteRepository clienteRepository;
+    private ClientRepository clientRepository;
 
     @Transactional(readOnly = true)
     public Page<Fatura_old_DTO> findAllPaged(Pageable pageable){
@@ -82,9 +82,9 @@ public class FaturaService {
         entity.setDate(dto.getDate());
 
         entity.getClientes().clear();
-        for (ClienteDTO cliDTO : dto.getClientes()){
-            Cliente cliente = clienteRepository.getOne(cliDTO.getId());
-            entity.getClientes().add(cliente);
+        for (ClientDTO cliDTO : dto.getClientes()){
+            Client client = clientRepository.getOne(cliDTO.getId());
+            entity.getClientes().add(client);
         }
     }
 }

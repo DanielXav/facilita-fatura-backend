@@ -1,56 +1,52 @@
 package com.danielxavier.FacilitaFatura.services;
 
-import com.danielxavier.FacilitaFatura.dto.ClienteDTO;
-import com.danielxavier.FacilitaFatura.entities.Cliente;
+import com.danielxavier.FacilitaFatura.dto.ClientDTO;
+import com.danielxavier.FacilitaFatura.entities.Client;
 import com.danielxavier.FacilitaFatura.exceptions.DatabaseException;
 import com.danielxavier.FacilitaFatura.exceptions.ResourceNotFoundException;
-import com.danielxavier.FacilitaFatura.repositories.ClienteRepository;
-import com.danielxavier.FacilitaFatura.repositories.FaturaRepository;
+import com.danielxavier.FacilitaFatura.repositories.ClientRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ClienteService {
+public class ClientService {
 
     @Autowired
-    private ClienteRepository repository;
+    private ClientRepository repository;
 
     @Transactional(readOnly = true)
-    public Page<ClienteDTO> findAllPaged(Pageable pageable){
-        Page<Cliente> list = repository.findAll(pageable);
-        return list.map(ClienteDTO::new);
+    public Page<ClientDTO> findAllPaged(Pageable pageable){
+        Page<Client> list = repository.findAll(pageable);
+        return list.map(ClientDTO::new);
     }
 
     @Transactional(readOnly = true)
-    public ClienteDTO findById(Long id){
-        Optional<Cliente> obj = repository.findById(id);
-        Cliente entity = obj.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado!"));
-        return new ClienteDTO(entity);
+    public ClientDTO findById(Long id){
+        Optional<Client> obj = repository.findById(id);
+        Client entity = obj.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado!"));
+        return new ClientDTO(entity);
     }
 
     @Transactional
-    public ClienteDTO insert(ClienteDTO dto){
-        Cliente entity = new Cliente();
+    public ClientDTO insert(ClientDTO dto){
+        Client entity = new Client();
         entity.setName(dto.getName());
-        entity.setTotal((dto.getTotal()));
         entity = repository.save(entity);
-        return new ClienteDTO(entity);
+        return new ClientDTO(entity);
     }
 
     @Transactional
     public void adicionarValor(Long id, Double total) {
         try {
-            Cliente entity = repository.getReferenceById(id);
+            Client entity = repository.getReferenceById(id);
             entity.setTotal(entity.getTotal()+total);
             repository.save(entity);
         }
@@ -60,13 +56,12 @@ public class ClienteService {
     }
 
     @Transactional
-    public ClienteDTO update(Long id, ClienteDTO dto) {
+    public ClientDTO update(Long id, ClientDTO dto) {
         try {
-            Cliente entity = repository.getReferenceById(id);
+            Client entity = repository.getReferenceById(id);
             entity.setName(dto.getName());
-            entity.setTotal((dto.getTotal()));
             entity = repository.save(entity);
-            return new ClienteDTO(entity);
+            return new ClientDTO(entity);
         }
         catch (EntityNotFoundException e) {
             throw new ResourceNotFoundException("Id não encontrado " + id);
