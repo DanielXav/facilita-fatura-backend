@@ -1,23 +1,22 @@
 package com.danielxavier.FacilitaFatura.dto;
 
-import com.danielxavier.FacilitaFatura.entities.Cliente;
+import com.danielxavier.FacilitaFatura.entities.Client;
 
-public class ClienteDTO {
+public class ClientDTO {
 
     private Long id;
     private String name;
     private Double total;
 
-    public ClienteDTO(){
+    public ClientDTO(){
     }
 
-    public ClienteDTO(Long id, String name, Double total) {
+    public ClientDTO(Long id, String name) {
         this.id = id;
         this.name = name;
-        this.total = total;
     }
 
-    public ClienteDTO(Cliente entity){
+    public ClientDTO(Client entity){
         this.id = entity.getId();
         this.name = entity.getName();
         this.total = entity.getTotal();

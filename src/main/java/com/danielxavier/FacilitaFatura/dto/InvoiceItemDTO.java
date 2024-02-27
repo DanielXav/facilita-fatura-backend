@@ -1,17 +1,11 @@
-package com.danielxavier.FacilitaFatura.entities;
+package com.danielxavier.FacilitaFatura.dto;
 
-import jakarta.persistence.*;
+import com.danielxavier.FacilitaFatura.entities.InvoiceItem;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Objects;
 
-@Entity
-@Table(name = "tb_invoice_item")
-public class InvoiceItem {
+public class InvoiceItemDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String brand;
     private LocalDate purchaseDate;
@@ -19,24 +13,24 @@ public class InvoiceItem {
     private String installment;
     private Double itemValue;
 
-    @ManyToOne
-    @JoinColumn(name = "invoice_id")
-    private Invoice invoice;
+    public InvoiceItemDTO(){}
 
-    @ManyToOne
-    @JoinColumn(name = "client_id") // Isso cria uma coluna de chave estrangeira na tabela InvoiceItem.
-    private Client client;
-
-    public InvoiceItem() {
-    }
-
-    public InvoiceItem(Long id, String brand, LocalDate purchaseDate, String establishment, String installment, Double itemValue) {
+    public InvoiceItemDTO(Long id, String brand, LocalDate purchaseDate, String establishment, String installment, Double itemValue) {
         this.id = id;
         this.brand = brand;
         this.purchaseDate = purchaseDate;
         this.establishment = establishment;
         this.installment = installment;
         this.itemValue = itemValue;
+    }
+
+    public InvoiceItemDTO(InvoiceItem entity) {
+        this.id = entity.getId();
+        this.brand = entity.getBrand();
+        this.purchaseDate = entity.getPurchaseDate();
+        this.establishment = entity.getEstablishment();
+        this.installment = entity.getInstallment();
+        this.itemValue = entity.getItemValue();
     }
 
     public Long getId() {
@@ -85,17 +79,5 @@ public class InvoiceItem {
 
     public void setItemValue(Double itemValue) {
         this.itemValue = itemValue;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof InvoiceItem that)) return false;
-        return Objects.equals(getId(), that.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId());
     }
 }
