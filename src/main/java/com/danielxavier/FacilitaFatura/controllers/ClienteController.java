@@ -16,12 +16,12 @@ import java.net.URI;
 
 @RestController
 @RequestMapping(value = "/clientes")
-public class ClienteResource {
+public class ClienteController {
 
     @Autowired
     private ClientService service;
 
-    private static final Logger logger = LoggerFactory.getLogger(ClienteResource.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClienteController.class);
 
     @GetMapping
     public ResponseEntity<Page<ClientDTO>> findAll(Pageable pageable){
@@ -43,14 +43,8 @@ public class ClienteResource {
         return ResponseEntity.created(uri).body(dto);
     }
 
-    @PostMapping(value = "/{id}/adicionar-valor")
-    public ResponseEntity<String> insert(@PathVariable Long id, @RequestBody Double total){
-        service.adicionarValor(id, total);
-        return ResponseEntity.ok("Operação bem-sucedida!");
-    }
-
     @PutMapping(value = "/{id}")
-    public ResponseEntity<ClientDTO> insert(@PathVariable Long id, @RequestBody ClientDTO dto){
+    public ResponseEntity<ClientDTO> update(@PathVariable Long id, @RequestBody ClientDTO dto){
         dto = service.update(id, dto);
         return ResponseEntity.ok().body(dto);
     }

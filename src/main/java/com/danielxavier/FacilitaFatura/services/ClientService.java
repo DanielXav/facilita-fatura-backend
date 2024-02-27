@@ -30,8 +30,8 @@ public class ClientService {
 
     @Transactional(readOnly = true)
     public ClientDTO findById(Long id){
-        Optional<Client> obj = repository.findById(id);
-        Client entity = obj.orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado!"));
+        Client entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Id não encontrado " + id));
         return new ClientDTO(entity);
     }
 
@@ -41,18 +41,6 @@ public class ClientService {
         entity.setName(dto.getName());
         entity = repository.save(entity);
         return new ClientDTO(entity);
-    }
-
-    @Transactional
-    public void adicionarValor(Long id, Double total) {
-        try {
-            Client entity = repository.getReferenceById(id);
-            entity.setTotal(entity.getTotal()+total);
-            repository.save(entity);
-        }
-        catch (EntityNotFoundException e) {
-            throw new ResourceNotFoundException("Id não encontrado " + id);
-        }
     }
 
     @Transactional
@@ -68,7 +56,6 @@ public class ClientService {
         }
     }
 
-    @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(Long id) {
         if (!repository.existsById(id)){
             throw new ResourceNotFoundException("Cliente não encontrado!");
