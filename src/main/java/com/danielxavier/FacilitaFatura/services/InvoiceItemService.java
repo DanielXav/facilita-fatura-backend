@@ -2,8 +2,11 @@ package com.danielxavier.FacilitaFatura.services;
 
 
 import com.danielxavier.FacilitaFatura.dto.InvoiceItemDTO;
+import com.danielxavier.FacilitaFatura.entities.Invoice;
 import com.danielxavier.FacilitaFatura.entities.InvoiceItem;
+import com.danielxavier.FacilitaFatura.exceptions.ResourceNotFoundException;
 import com.danielxavier.FacilitaFatura.repositories.InvoiceItemRepository;
+import com.danielxavier.FacilitaFatura.repositories.InvoiceRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,6 +24,8 @@ public class InvoiceItemService {
     @Autowired
     private InvoiceItemRepository repository;
 
+    @Autowired
+    private InvoiceRepository invoiceRepository;
     private static final Pattern PATTERN_1 = Pattern.compile(
             "\\@?(\\d{2}/\\d{2})\\s*(.*?)\\s*(\\d{2}/\\d{2})?\\s*\\n?((\\d{1,3}(?:[.,]\\d{3})*[.,]\\d{2})|\\d+[.,]\\d{2})"
     );
@@ -78,17 +83,17 @@ public class InvoiceItemService {
         }
     }
 
-    public List<InvoiceItemDTO> parseInvoiceItems(String text, String brand) {
+    public List<InvoiceItemDTO> parseInvoiceItems(Long invoiceId, String text, String brand) {
         List<InvoiceItem> allItems = new ArrayList<>();
         List<InvoiceItemDTO> allItemsDTO = new ArrayList<>();
 
-        allItems.addAll(parsePattern(text, PATTERN_1, brand));
-        allItems.addAll(parsePattern(text, PATTERN_2, brand));
-        allItems.addAll(parsePattern(text, PATTERN_3, brand));
-        allItems.addAll(parsePattern(text, PATTERN_6, brand));
-        allItems.addAll(parsePattern(text, PATTERN_5, brand));
-        allItems.addAll(parsePattern(text, PATTERN_4, brand));
-        allItems.addAll(parsePattern(text, PATTERN_7, brand));
+        allItems.addAll(parsePattern(invoiceId, text, PATTERN_1, brand));
+        allItems.addAll(parsePattern(invoiceId, text, PATTERN_2, brand));
+        allItems.addAll(parsePattern(invoiceId, text, PATTERN_3, brand));
+        allItems.addAll(parsePattern(invoiceId, text, PATTERN_6, brand));
+        allItems.addAll(parsePattern(invoiceId, text, PATTERN_5, brand));
+        allItems.addAll(parsePattern(invoiceId, text, PATTERN_4, brand));
+        allItems.addAll(parsePattern(invoiceId, text, PATTERN_7, brand));
 
         List<InvoiceItem> filteredItems = filterDuplicateItems(allItems);
         repository.saveAll(filteredItems);
@@ -136,8 +141,12 @@ public class InvoiceItemService {
 
 
 
-    private List<InvoiceItem> parsePattern(String text, Pattern pattern, String brand) {
+    private List<InvoiceItem> parsePattern(Long invoiceId, String text, Pattern pattern, String brand) {
         List<InvoiceItem> matchedItems = new ArrayList<>();
+
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Invoice não encontrado com ID: " + invoiceId));
+
         Matcher matcher = pattern.matcher(text);
 
         while (matcher.find()) {
@@ -179,6 +188,7 @@ public class InvoiceItemService {
             item.setEstablishment(establishment);
             item.setInstallment(installment);
             item.setItemValue(value);
+            item.setInvoice(invoice);
 
             matchedItems.add(item);
         }
