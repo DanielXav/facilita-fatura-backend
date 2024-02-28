@@ -39,6 +39,9 @@ public class InvoiceItemService {
     @Autowired
     private ClientRepository clientRepository;
 
+    @Autowired
+    private ClientService clientService;
+
     // Funções necessárias para pegar padrões dos itens das faturas e editar corretamente as Strings para guardar no banco nos devidos atributos.
 
     private static final Pattern PATTERN_1 = Pattern.compile(
@@ -249,15 +252,27 @@ public class InvoiceItemService {
     }
 
     @Transactional
-    public void assignClientToInvoiceItem(Long invoiceItemId, Long clientId) {
-        InvoiceItem invoiceItem = repository.findById(invoiceItemId)
+    public void assignClientToInvoiceItem(Long invoiceItemId, Long newClientId) {
+        InvoiceItem item = repository.findById(invoiceItemId)
                 .orElseThrow(() -> new ResourceNotFoundException("InvoiceItem não encontrado com ID: " + invoiceItemId));
 
-        Client client = clientRepository.findById(clientId)
-                .orElseThrow(() -> new ResourceNotFoundException("Client não encontrado com ID: " + clientId));
+        // Guarda o ID do cliente antigo, se houver
+        Long oldClientId = item.getClient() != null ? item.getClient().getId() : null;
 
-        invoiceItem.setClient(client);
-        repository.save(invoiceItem);
+        // Associa o novo cliente
+        Client newClient = clientRepository.findById(newClientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente não encontrado com ID: " + newClientId));
+
+        item.setClient(newClient);
+        repository.save(item);
+
+        // Recalcula o total para o cliente anterior, se houver
+        if (oldClientId != null) {
+            clientService.recalculateClientTotal(oldClientId);
+        }
+
+        // Recalcula o total para o novo cliente
+        clientService.recalculateClientTotal(newClientId);
     }
 
     @Transactional
