@@ -24,7 +24,7 @@ public class InvoiceItem {
     private Invoice invoice;
 
     @ManyToOne
-    @JoinColumn(name = "client_id") // Isso cria uma coluna de chave estrangeira na tabela InvoiceItem.
+    @JoinColumn(name = "client_id")
     private Client client;
 
     public InvoiceItem() {

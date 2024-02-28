@@ -14,9 +14,11 @@ public class InvoiceItemDTO {
     private Double itemValue;
     private Long invoiceId;
 
+    private Long clientId;
+
     public InvoiceItemDTO(){}
 
-    public InvoiceItemDTO(Long id, String brand, LocalDate purchaseDate, String establishment, String installment, Double itemValue, Long invoiceId) {
+    public InvoiceItemDTO(Long id, String brand, LocalDate purchaseDate, String establishment, String installment, Double itemValue, Long invoiceId, Long clientId) {
         this.id = id;
         this.brand = brand;
         this.purchaseDate = purchaseDate;
@@ -24,6 +26,7 @@ public class InvoiceItemDTO {
         this.installment = installment;
         this.itemValue = itemValue;
         this.invoiceId = invoiceId;
+        this.clientId = clientId;
     }
 
     public InvoiceItemDTO(InvoiceItem entity) {
@@ -34,6 +37,7 @@ public class InvoiceItemDTO {
         this.installment = entity.getInstallment();
         this.itemValue = entity.getItemValue();
         this.invoiceId = entity.getInvoice() != null ? entity.getInvoice().getId() : null;
+        this.clientId = entity.getClient() != null ? entity.getClient().getId() : null;
     }
 
     public Long getId() {
@@ -90,5 +94,13 @@ public class InvoiceItemDTO {
 
     public void setInvoiceId(Long invoiceId) {
         this.invoiceId = invoiceId;
+    }
+
+    public Long getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(Long clientId) {
+        this.clientId = clientId;
     }
 }

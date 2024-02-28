@@ -1,15 +1,24 @@
 package com.danielxavier.FacilitaFatura.services;
 
 
+import com.danielxavier.FacilitaFatura.dto.ClientDTO;
 import com.danielxavier.FacilitaFatura.dto.InvoiceItemDTO;
 import com.danielxavier.FacilitaFatura.entities.Invoice;
 import com.danielxavier.FacilitaFatura.entities.InvoiceItem;
+import com.danielxavier.FacilitaFatura.entities.Client;
+import com.danielxavier.FacilitaFatura.exceptions.DatabaseException;
 import com.danielxavier.FacilitaFatura.exceptions.ResourceNotFoundException;
+import com.danielxavier.FacilitaFatura.repositories.ClientRepository;
 import com.danielxavier.FacilitaFatura.repositories.InvoiceItemRepository;
 import com.danielxavier.FacilitaFatura.repositories.InvoiceRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.Year;
@@ -26,6 +35,12 @@ public class InvoiceItemService {
 
     @Autowired
     private InvoiceRepository invoiceRepository;
+
+    @Autowired
+    private ClientRepository clientRepository;
+
+    // Funções necessárias para pegar padrões dos itens das faturas e editar corretamente as Strings para guardar no banco nos devidos atributos.
+
     private static final Pattern PATTERN_1 = Pattern.compile(
             "\\@?(\\d{2}/\\d{2})\\s*(.*?)\\s*(\\d{2}/\\d{2})?\\s*\\n?((\\d{1,3}(?:[.,]\\d{3})*[.,]\\d{2})|\\d+[.,]\\d{2})"
     );
@@ -216,6 +231,58 @@ public class InvoiceItemService {
         return items.stream()
                 .map(InvoiceItemDTO::getItemValue)
                 .reduce(0.0, Double::sum);
+    }
+
+    // Restante do CRUD
+
+    @Transactional(readOnly = true)
+    public Page<InvoiceItemDTO> findAllPaged(Pageable pageable){
+        Page<InvoiceItem> list = repository.findAll(pageable);
+        return list.map(InvoiceItemDTO::new);
+    }
+
+    @Transactional(readOnly = true)
+    public InvoiceItemDTO findById(Long id){
+        InvoiceItem entity = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Id não encontrado " + id));
+        return new InvoiceItemDTO(entity);
+    }
+
+    @Transactional
+    public void assignClientToInvoiceItem(Long invoiceItemId, Long clientId) {
+        InvoiceItem invoiceItem = repository.findById(invoiceItemId)
+                .orElseThrow(() -> new ResourceNotFoundException("InvoiceItem não encontrado com ID: " + invoiceItemId));
+
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Client não encontrado com ID: " + clientId));
+
+        invoiceItem.setClient(client);
+        repository.save(invoiceItem);
+    }
+
+    @Transactional
+    public InvoiceItemDTO update(Long id, InvoiceItemDTO dto) {
+        try {
+            InvoiceItem entity = repository.getReferenceById(id);
+            BeanUtils.copyProperties(dto, entity, "id");
+            entity = repository.save(entity);
+            return new InvoiceItemDTO(entity);
+        }
+        catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("Id não encontrado " + id);
+        }
+    }
+
+    public void delete(Long id) {
+        if (!repository.existsById(id)){
+            throw new ResourceNotFoundException("Item não encontrado!");
+        }
+        try {
+            repository.deleteById(id);
+        }
+        catch (DataIntegrityViolationException e){
+            throw new DatabaseException("Falha na integridade referencial");
+        }
     }
 }
 
