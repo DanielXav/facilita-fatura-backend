@@ -1,7 +1,7 @@
 package com.danielxavier.FacilitaFatura.controllers;
 
-import com.danielxavier.FacilitaFatura.dto.ClienteDTO;
-import com.danielxavier.FacilitaFatura.services.ClienteService;
+import com.danielxavier.FacilitaFatura.dto.ClientDTO;
+import com.danielxavier.FacilitaFatura.services.ClientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,41 +16,35 @@ import java.net.URI;
 
 @RestController
 @RequestMapping(value = "/clientes")
-public class ClienteResource {
+public class ClienteController {
 
     @Autowired
-    private ClienteService service;
+    private ClientService service;
 
-    private static final Logger logger = LoggerFactory.getLogger(ClienteResource.class);
+    private static final Logger logger = LoggerFactory.getLogger(ClienteController.class);
 
     @GetMapping
-    public ResponseEntity<Page<ClienteDTO>> findAll(Pageable pageable){
-        Page<ClienteDTO> list = service.findAllPaged(pageable);
+    public ResponseEntity<Page<ClientDTO>> findAll(Pageable pageable){
+        Page<ClientDTO> list = service.findAllPaged(pageable);
         return ResponseEntity.ok().body(list);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<ClienteDTO> findById(@PathVariable Long id){
-        ClienteDTO dto = service.findById(id);
+    public ResponseEntity<ClientDTO> findById(@PathVariable Long id){
+        ClientDTO dto = service.findById(id);
         return ResponseEntity.ok().body(dto);
     }
 
     @PostMapping
-    public ResponseEntity<ClienteDTO> insert(@RequestBody ClienteDTO dto){
+    public ResponseEntity<ClientDTO> insert(@RequestBody ClientDTO dto){
         dto = service.insert(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(dto.getId()).toUri();
         return ResponseEntity.created(uri).body(dto);
     }
 
-    @PostMapping(value = "/{id}/adicionar-valor")
-    public ResponseEntity<String> insert(@PathVariable Long id, @RequestBody Double total){
-        service.adicionarValor(id, total);
-        return ResponseEntity.ok("Operação bem-sucedida!");
-    }
-
     @PutMapping(value = "/{id}")
-    public ResponseEntity<ClienteDTO> insert(@PathVariable Long id, @RequestBody ClienteDTO dto){
+    public ResponseEntity<ClientDTO> update(@PathVariable Long id, @RequestBody ClientDTO dto){
         dto = service.update(id, dto);
         return ResponseEntity.ok().body(dto);
     }

@@ -1,42 +1,43 @@
-package com.danielxavier.FacilitaFatura.entities;
+package com.danielxavier.FacilitaFatura.dto;
 
-import jakarta.persistence.*;
+import com.danielxavier.FacilitaFatura.entities.InvoiceItem;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Objects;
 
-@Entity
-@Table(name = "tb_invoice_item")
-public class InvoiceItem {
+public class InvoiceItemDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String brand;
     private LocalDate purchaseDate;
     private String establishment;
     private String installment;
     private Double itemValue;
+    private Long invoiceId;
 
-    @ManyToOne
-    @JoinColumn(name = "invoice_id")
-    private Invoice invoice;
+    private Long clientId;
 
-    @ManyToOne
-    @JoinColumn(name = "client_id")
-    private Client client;
+    public InvoiceItemDTO(){}
 
-    public InvoiceItem() {
-    }
-
-    public InvoiceItem(Long id, String brand, LocalDate purchaseDate, String establishment, String installment, Double itemValue) {
+    public InvoiceItemDTO(Long id, String brand, LocalDate purchaseDate, String establishment, String installment, Double itemValue, Long invoiceId, Long clientId) {
         this.id = id;
         this.brand = brand;
         this.purchaseDate = purchaseDate;
         this.establishment = establishment;
         this.installment = installment;
         this.itemValue = itemValue;
+        this.invoiceId = invoiceId;
+        this.clientId = clientId;
+    }
+
+    public InvoiceItemDTO(InvoiceItem entity) {
+        this.id = entity.getId();
+        this.brand = entity.getBrand();
+        this.purchaseDate = entity.getPurchaseDate();
+        this.establishment = entity.getEstablishment();
+        this.installment = entity.getInstallment();
+        this.itemValue = entity.getItemValue();
+        this.invoiceId = entity.getInvoice() != null ? entity.getInvoice().getId() : null;
+        this.clientId = entity.getClient() != null ? entity.getClient().getId() : null;
     }
 
     public Long getId() {
@@ -87,31 +88,19 @@ public class InvoiceItem {
         this.itemValue = itemValue;
     }
 
-    public Invoice getInvoice() {
-        return invoice;
+    public Long getInvoiceId() {
+        return invoiceId;
     }
 
-    public void setInvoice(Invoice invoice) {
-        this.invoice = invoice;
+    public void setInvoiceId(Long invoiceId) {
+        this.invoiceId = invoiceId;
     }
 
-    public Client getClient() {
-        return client;
+    public Long getClientId() {
+        return clientId;
     }
 
-    public void setClient(Client client) {
-        this.client = client;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof InvoiceItem that)) return false;
-        return Objects.equals(getId(), that.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId());
+    public void setClientId(Long clientId) {
+        this.clientId = clientId;
     }
 }

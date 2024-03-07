@@ -3,28 +3,31 @@ package com.danielxavier.FacilitaFatura.entities;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "tb_cliente")
-public class Cliente {
+@Table(name = "tb_client")
+public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String card;
     private String name;
     private Double total;
+
+    @OneToMany(mappedBy = "client")
+    private List<InvoiceItem> items;
+
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private Instant createdAt;
 
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private Instant updateAt;
-    public Cliente(){
+    public Client(){
     }
 
-    public Cliente(Long id, String name, Double total) {
+    public Client(Long id, String name, Double total) {
         this.id = id;
         this.name = name;
         this.total = total;
@@ -75,8 +78,8 @@ public class Cliente {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Cliente cliente)) return false;
-        return Objects.equals(id, cliente.id);
+        if (!(o instanceof Client client)) return false;
+        return Objects.equals(id, client.id);
     }
 
     @Override
